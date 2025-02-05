@@ -52,23 +52,12 @@ def draw_multiline_text(
     x, y = pos
     x = x - max_width // 2  # Center horizontally by adjusting x position
     bg_padding = 40  # Increased padding
-    gradient_height = 20  # Height of gradient effect
 
-    # Draw background with gradient effect
+    # Draw single solid background without gradient
     bg_x1, bg_y1 = x - bg_padding, y - total_height - bg_padding
     bg_x2, bg_y2 = x + max_width + bg_padding, y + bg_padding
-
-    # Main background (darker)
-    bg_color_main = (0, 0, 0, 200)  # More opaque background
-    draw.rounded_rectangle([bg_x1, bg_y1, bg_x2, bg_y2], radius=20, fill=bg_color_main)
-
-    # Top gradient (subtle highlight)
-    for i in range(gradient_height):
-        alpha = int(120 * (1 - i / gradient_height))  # Gradient fade
-        gradient_color = (255, 255, 255, alpha)
-        draw.rounded_rectangle(
-            [bg_x1, bg_y1 + i, bg_x2, bg_y1 + i + 1], radius=20, fill=gradient_color
-        )
+    bg_color = (0, 0, 0, 200)  # Single solid background color
+    draw.rounded_rectangle([bg_x1, bg_y1, bg_x2, bg_y2], radius=20, fill=bg_color)
 
     current_y = y - total_height
     shadow_offset = 3  # Increased shadow offset
@@ -79,14 +68,13 @@ def draw_multiline_text(
         line_width = line_bbox[2] - line_bbox[0]
         line_x = x + (max_width - line_width) // 2  # Center each line individually
 
-        # Multiple shadow layers for depth
-        for offset in range(1, shadow_offset + 1):
-            draw.text(
-                (line_x + offset, current_y + offset),
-                line,
-                font=font,
-                fill=(0, 0, 0, 120 - offset * 20),
-            )
+        # Draw shadow
+        draw.text(
+            (line_x + shadow_offset, current_y + shadow_offset),
+            line,
+            font=font,
+            fill=shadow_color,
+        )
 
         # Thicker outline for better contrast
         if stroke_width > 0:

@@ -103,7 +103,7 @@ class VideoProcessor:
         temp_frames = output_path.with_suffix(".frames.mp4")
 
         (
-            ffmpeg.input(str(video_path), ss=start_time)
+            ffmpeg.input(str(video_path), ss=start_time, t=duration)
             .output(str(temp_frames), vf=f"scale={width}:{height}", acodec="aac")
             .overwrite_output()
             .run(quiet=True)
