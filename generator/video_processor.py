@@ -10,8 +10,6 @@ from generator.llm_processor import TimeSegment
 from generator.subtitle import Sentence
 from generator.utils import (
     AspectRatio,
-    adjust_crop_box,
-    calculate_crop_dimensions,
     draw_multiline_text,
 )
 
@@ -29,10 +27,15 @@ class VideoProcessor:
         """Extract audio using direct ffmpeg"""
         temp_audio = Path(tempfile.gettempdir()) / "temp_audio.wav"
         logger.info(f"Extracting audio to {temp_audio}")
+        # length in seconds
 
         (
             ffmpeg.input(str(video_path))
-            .output(str(temp_audio), acodec="pcm_s16le", ar="16k")
+            .output(
+                str(temp_audio),
+                acodec="pcm_s16le",
+                ar="16k",
+            )
             .overwrite_output()
             .run(quiet=True)
         )
@@ -100,7 +103,7 @@ class VideoProcessor:
         temp_frames = output_path.with_suffix(".frames.mp4")
 
         (
-            ffmpeg.input(str(video_path), ss=start_time, t=duration)
+            ffmpeg.input(str(video_path), ss=start_time)
             .output(str(temp_frames), vf=f"scale={width}:{height}", acodec="aac")
             .overwrite_output()
             .run(quiet=True)

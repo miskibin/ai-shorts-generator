@@ -1,3 +1,8 @@
+import os
+from dotenv import load_dotenv
+
+load_dotenv()  # Add this at the very top of the file
+
 import json
 from pathlib import Path
 from loguru import logger
@@ -41,7 +46,7 @@ def process_video(
 
 
 if __name__ == "__main__":
-    input_video = Path(__file__).parent / "inputs" / "odrzeczy.mkv"
+    input_video = Path(__file__).parent / "inputs" / "bestia.mkv"
     output_video = Path(__file__).parent / "outputs" / "highlights.mp4"
     output_video.parent.mkdir(exist_ok=True)
 

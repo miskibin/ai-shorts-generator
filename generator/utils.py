@@ -4,6 +4,10 @@ import cv2
 from loguru import logger
 import numpy as np
 
+from PIL import Image, ImageDraw, ImageFont
+import numpy as np
+from typing import Tuple
+
 
 class AspectRatio(Enum):
     SQUARE = (720, 720)  # 1:1
@@ -15,11 +19,6 @@ def moving_average(values, window_size):
     weights = np.exp(np.linspace(-1.0, 0.0, window_size))
     weights /= weights.sum()
     return np.convolve(values, weights, mode="valid")
-
-
-from PIL import Image, ImageDraw, ImageFont
-import numpy as np
-from typing import Tuple
 
 
 def draw_multiline_text(
@@ -52,45 +51,55 @@ def draw_multiline_text(
 
     x, y = pos
     x = x - max_width // 2  # Center horizontally by adjusting x position
-    bg_padding = 30  # Update background padding for larger text
-    text_padding = 10
+    bg_padding = 40  # Increased padding
+    gradient_height = 20  # Height of gradient effect
 
-    # Draw semi-transparent background with rounded corners
+    # Draw background with gradient effect
     bg_x1, bg_y1 = x - bg_padding, y - total_height - bg_padding
     bg_x2, bg_y2 = x + max_width + bg_padding, y + bg_padding
-    bg_color = (0, 0, 0, 160)  # More subtle opacity for better aesthetics
-    draw.rounded_rectangle([bg_x1, bg_y1, bg_x2, bg_y2], radius=15, fill=bg_color)
 
-    # Draw text with shadow for better readability
+    # Main background (darker)
+    bg_color_main = (0, 0, 0, 200)  # More opaque background
+    draw.rounded_rectangle([bg_x1, bg_y1, bg_x2, bg_y2], radius=20, fill=bg_color_main)
+
+    # Top gradient (subtle highlight)
+    for i in range(gradient_height):
+        alpha = int(120 * (1 - i / gradient_height))  # Gradient fade
+        gradient_color = (255, 255, 255, alpha)
+        draw.rounded_rectangle(
+            [bg_x1, bg_y1 + i, bg_x2, bg_y1 + i + 1], radius=20, fill=gradient_color
+        )
+
     current_y = y - total_height
-    shadow_offset = 2
-    shadow_color = (0, 0, 0, 150)  # Semi-transparent black for soft shadow
+    shadow_offset = 3  # Increased shadow offset
+    shadow_color = (0, 0, 0, 180)  # Darker shadow
 
     for i, line in enumerate(lines):
         line_bbox = draw.textbbox((0, 0), line, font=font)
         line_width = line_bbox[2] - line_bbox[0]
         line_x = x + (max_width - line_width) // 2  # Center each line individually
 
-        # Draw text shadow
-        draw.text(
-            (line_x + shadow_offset, current_y + shadow_offset),
-            line,
-            font=font,
-            fill=shadow_color,
-        )
+        # Multiple shadow layers for depth
+        for offset in range(1, shadow_offset + 1):
+            draw.text(
+                (line_x + offset, current_y + offset),
+                line,
+                font=font,
+                fill=(0, 0, 0, 120 - offset * 20),
+            )
 
-        # Draw text stroke/outline (if stroke_width > 0)
+        # Thicker outline for better contrast
         if stroke_width > 0:
             draw.text(
                 (line_x, current_y),
                 line,
                 font=font,
                 fill=(0, 0, 0),  # Black outline
-                stroke_width=stroke_width,
+                stroke_width=stroke_width + 1,
             )
 
-        # Draw main text
-        draw.text((line_x, current_y), line, font=font, fill=color)
+        # Main text (brighter white)
+        draw.text((line_x, current_y), line, font=font, fill=(255, 255, 255))
 
         current_y += line_heights[i]
 
@@ -99,49 +108,3 @@ def draw_multiline_text(
     result_array = cv2.cvtColor(result_array, cv2.COLOR_RGB2BGR)
 
     return result_array
-
-
-def calculate_crop_dimensions(
-    frame_width: int, frame_height: int, target_ratio: float, margin: float = 0.6
-) -> tuple[int, int]:
-    """Calculate crop dimensions with much wider view"""
-    crop_height = frame_height
-    crop_width = int(crop_height * target_ratio)
-
-    # Use larger margin for much wider view
-    effective_width = int(crop_width * (1 - margin))
-    effective_height = int(crop_height * (1 - margin))
-
-    return effective_width, effective_height
-
-
-def adjust_crop_box(
-    center_x: int,
-    center_y: int,
-    frame_width: int,
-    frame_height: int,
-    target_width: int,
-    target_height: int,
-) -> tuple[int, int, int, int]:
-    """Calculate crop coordinates with better face positioning"""
-    # Center point should be higher in the frame for better composition
-    center_y = int(center_y * 0.8)  # Move center point up by 20%
-
-    # Calculate initial crop area
-    x_start = max(0, center_x - target_width // 2)
-    x_end = min(frame_width, x_start + target_width)
-    y_start = max(0, center_y - target_height // 3)  # Use 1/3 for better head room
-    y_end = min(frame_height, y_start + target_height)
-
-    # Adjust if we hit frame boundaries
-    if x_start == 0:
-        x_end = target_width
-    elif x_end == frame_width:
-        x_start = frame_width - target_width
-
-    if y_start == 0:
-        y_end = target_height
-    elif y_end == frame_height:
-        y_start = frame_height - target_height
-
-    return x_start, y_start, x_end, y_end

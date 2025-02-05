@@ -8,6 +8,7 @@ wheels/
 
 # Virtual environments
 .venv
+output/*
 *.mp4
 *.avi
 *.mov
