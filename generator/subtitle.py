@@ -26,9 +26,7 @@ class SubtitleGenerator:
     def process(self, audio_path: Path) -> list[Sentence]:
         try:
             # Transcribe and align
-            result = self.model.transcribe(
-                str(audio_path), batch_size=16, language="pl"
-            )
+            result = self.model.transcribe(str(audio_path), language="pl")
             logger.debug(f"Transcribed {len(result['segments'])} segments")
 
             model_a, metadata = whisperx.load_align_model(

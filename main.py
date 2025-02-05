@@ -41,14 +41,14 @@ def process_video(
 
 
 if __name__ == "__main__":
-    input_video = Path(__file__).parent / "inputs" / "bestia.mkv"
+    input_video = Path(__file__).parent / "inputs" / "odrzeczy.mkv"
     output_video = Path(__file__).parent / "outputs" / "highlights.mp4"
     output_video.parent.mkdir(exist_ok=True)
 
     process_video(
         video_path=input_video,
         output_path=output_video,
-        model_size="base",
+        model_size="large-v2",
         llm_model="gemma2",
         max_duration=60.0,
     )

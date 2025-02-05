@@ -45,7 +45,7 @@ class LLMProcessor:
         logger.info(f"Initialized LLM processor with {model_name}")
 
     def process(
-        self, sentences: list[Sentence], max_duration: float = 30.0
+        self, sentences: list[Sentence], max_duration: float
     ) -> list[TimeSegment]:
         try:
             segments_text = "\n".join(
