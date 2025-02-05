@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+import argparse
 
 load_dotenv()  # Add this at the very top of the file
 
@@ -45,15 +46,54 @@ def process_video(
         audio_path.unlink()
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="AI Video Processor for creating highlights with subtitles"
+    )
+    parser.add_argument("input", type=str, help="Path to input video file")
+    parser.add_argument(
+        "-o",
+        "--output",
+        type=str,
+        help="Path to output video file (default: ./outputs/highlights.mp4)",
+        default="outputs/highlights.mp4",
+    )
+    parser.add_argument(
+        "--model-size",
+        type=str,
+        default="base",
+        help="Model size for subtitle generation (default: base)",
+    )
+    parser.add_argument(
+        "--llm-model",
+        type=str,
+        default="phi4",
+        help="LLM model for processing (default: phi4)",
+    )
+    parser.add_argument(
+        "--max-duration",
+        type=float,
+        default=60.0,
+        help="Maximum duration of highlights in seconds (default: 60.0)",
+    )
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
-    input_video = Path(__file__).parent / "inputs" / "bestia.mkv"
-    output_video = Path(__file__).parent / "outputs" / "highlights.mp4"
+    args = parse_args()
+
+    input_video = Path(args.input)
+    output_video = Path(args.output)
     output_video.parent.mkdir(exist_ok=True)
+
+    if not input_video.exists():
+        logger.error(f"Input video not found: {input_video}")
+        exit(1)
 
     process_video(
         video_path=input_video,
         output_path=output_video,
-        model_size="large-v2",
-        llm_model="gemma2",
-        max_duration=60.0,
+        model_size=args.model_size,
+        llm_model=args.llm_model,
+        max_duration=args.max_duration,
     )
