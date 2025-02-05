@@ -34,7 +34,7 @@ class VideoProcessor:
             ffmpeg.input(str(video_path))
             .output(str(temp_audio), acodec="pcm_s16le", ar="16k")
             .overwrite_output()
-            .run()
+            .run(quiet=True)
         )
 
         return temp_audio
@@ -71,7 +71,7 @@ class VideoProcessor:
             ffmpeg.input(str(concat_file), f="concat", safe=0)
             .output(str(output_path), c="copy")
             .overwrite_output()
-            .run()
+            .run(quiet=True)
         )
 
         logger.success(f"Created highlights video: {output_path}")
@@ -103,7 +103,7 @@ class VideoProcessor:
             ffmpeg.input(str(video_path), ss=start_time, t=duration)
             .output(str(temp_frames), vf=f"scale={width}:{height}", acodec="aac")
             .overwrite_output()
-            .run()
+            .run(quiet=True)
         )
 
         # Process frames with face tracking
@@ -133,28 +133,34 @@ class VideoProcessor:
 
         frame_idx = 0
         first_frame = True
+        force_center = False  # Track if we should use center framing
+
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
                 break
 
-            # Initialize or update tracking using correct method name
+            # Initialize or update tracking
             if first_frame:
                 box = self.face_tracker.detect_face(frame)
-                self.face_tracker.update_tracking(
-                    frame, box
-                )  # Changed from init_tracking
+                if box is None:
+                    # Multiple faces detected, use center framing
+                    force_center = True
+                    logger.info("Multiple faces detected, using center framing")
+                else:
+                    self.face_tracker.update_tracking(frame)
                 first_frame = False
 
-            # Get tracked position and calculate crop
-            center_x, center_y = self.face_tracker.update_tracking(frame)
+            # Get face center if available
+            face_center_x = self.face_tracker.update_tracking(frame)
+
+            # Get crop box (will be centered if no face detected)
             x1, y1, x2, y2 = self.face_tracker.get_crop_box(
-                center_x,
-                center_y,
                 frame.shape[1],
                 frame.shape[0],
                 AspectRatio.STORY.value[0],
                 AspectRatio.STORY.value[1],
+                face_center_x,
             )
 
             # Crop and resize
@@ -197,7 +203,7 @@ class VideoProcessor:
                 map="0:v:0",
             )
             .overwrite_output()
-            .run()
+            .run(quiet=True)
         )
 
         # Cleanup temporary files

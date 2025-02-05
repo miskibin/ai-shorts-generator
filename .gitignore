@@ -13,5 +13,7 @@ wheels/
 *.mov
 *.wav
 *.mkv
+*.webm
+
 *.mp3
 *.pt

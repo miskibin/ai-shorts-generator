@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from loguru import logger
 from generator.llm_processor import LLMProcessor
@@ -9,7 +10,7 @@ def process_video(
     video_path: Path,
     output_path: Path,
     model_size: str = "base",
-    llm_model: str = "gemma2",
+    llm_model: str = "phi4",
     max_duration: float = 30.0,
 ) -> None:
     audio_path = None
@@ -19,8 +20,13 @@ def process_video(
     # Extract audio and generate transcription
     audio_path = video_processor.extract_audio(video_path)
     sentences = SubtitleGenerator(model_size).process(audio_path)
+    # save sentences to jsonn
+    json_sentences = [s.model_dump_json() for s in sentences]
+    with open("sentences.json", "w") as f:
+        json.dump(json_sentences, f, indent=2)
 
     # Find interesting moments
+
     moments = LLMProcessor(llm_model).process(sentences, max_duration)
 
     # Create highlights with subtitles
@@ -28,14 +34,14 @@ def process_video(
 
     logger.info("\nHighlights created:")
     for m in moments:
-        logger.info(f"{m.start_time:.2f}-{m.end_time:.2f} ({m.duration}s): {m.reason}")
+        logger.info(f"{m.start_time:.2f}-{m.end_time:.2f} ({m.duration}s)")
 
     if audio_path.exists():
         audio_path.unlink()
 
 
 if __name__ == "__main__":
-    input_video = Path(__file__).parent / "inputs" / "test.mkv"
+    input_video = Path(__file__).parent / "inputs" / "bestia.mkv"
     output_video = Path(__file__).parent / "outputs" / "highlights.mp4"
     output_video.parent.mkdir(exist_ok=True)
 
@@ -44,5 +50,5 @@ if __name__ == "__main__":
         output_path=output_video,
         model_size="base",
         llm_model="gemma2",
-        max_duration=40.0,
+        max_duration=60.0,
     )

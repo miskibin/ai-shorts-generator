@@ -1,13 +1,12 @@
+from pydantic import BaseModel
 import whisperx
 import torch
 import json
 from pathlib import Path
-from dataclasses import dataclass
 from loguru import logger
 
 
-@dataclass
-class Sentence:
+class Sentence(BaseModel):
     text: str
     start: float
     end: float

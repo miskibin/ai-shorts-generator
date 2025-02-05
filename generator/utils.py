@@ -36,6 +36,8 @@ def draw_multiline_text(
     draw = ImageDraw.Draw(pil_img, "RGBA")  # Use RGBA for transparency support
     font = ImageFont.truetype(str(font_path.resolve()), font_size)
     lines = text.split("\n")
+
+    # Calculate text dimensions for centering
     max_width = 0
     total_height = 0
     line_heights = []
@@ -49,6 +51,7 @@ def draw_multiline_text(
         total_height += height
 
     x, y = pos
+    x = x - max_width // 2  # Center horizontally by adjusting x position
     bg_padding = 30  # Update background padding for larger text
     text_padding = 10
 
@@ -64,9 +67,13 @@ def draw_multiline_text(
     shadow_color = (0, 0, 0, 150)  # Semi-transparent black for soft shadow
 
     for i, line in enumerate(lines):
+        line_bbox = draw.textbbox((0, 0), line, font=font)
+        line_width = line_bbox[2] - line_bbox[0]
+        line_x = x + (max_width - line_width) // 2  # Center each line individually
+
         # Draw text shadow
         draw.text(
-            (x + shadow_offset, current_y + shadow_offset),
+            (line_x + shadow_offset, current_y + shadow_offset),
             line,
             font=font,
             fill=shadow_color,
@@ -75,7 +82,7 @@ def draw_multiline_text(
         # Draw text stroke/outline (if stroke_width > 0)
         if stroke_width > 0:
             draw.text(
-                (x, current_y),
+                (line_x, current_y),
                 line,
                 font=font,
                 fill=(0, 0, 0),  # Black outline
@@ -83,7 +90,7 @@ def draw_multiline_text(
             )
 
         # Draw main text
-        draw.text((x, current_y), line, font=font, fill=color)
+        draw.text((line_x, current_y), line, font=font, fill=color)
 
         current_y += line_heights[i]
 

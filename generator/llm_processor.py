@@ -11,7 +11,6 @@ from generator.subtitle import Sentence
 class TimeSegment:
     start_time: float
     end_time: float
-    reason: str
     duration: float = 0.0
 
     def __post_init__(self):
@@ -19,31 +18,27 @@ class TimeSegment:
 
 
 class LLMProcessor:
-    PROMPT_TEMPLATE = """Analyze this political speech and select up to 3 most interesting fragments (total max {max_duration}s).
-Each fragment can be a single sentence or multiple consecutive sentences.
+    PROMPT_TEMPLATE = """Analyze this political speech (given as a single text chunked into sentences) and select up to 3 continuous fragments that together form a coherent and logical segment. If one long segment makes the most sense, you can select just that one.
+    Requirements:
+    1. The selection must include the segment where the topic of the statement is introduced.  
+    2. The total duration must not exceed {max_duration}s; aim to use almost all of it.  
+    3. Each fragment must be a continuous block of sentences.  
+    4. The final selection should read as a naturally connected piece, maintaining logical flow.  
 
-Speech segments:
-{segments}
+    Speech segments:
+    {segments}
 
-Return JSON in this exact format:
-{{
-    "selections": [
-        {{
-            "start_time": float,
-            "end_time": float,
-            "reason": "why this part is interesting"
-        }}
-        // up to 3 selections allowed
-    ]
-}}
-
-Rules:
-1. Pick up to 3 most interesting parts
-2. Each part must be continuous (no gaps within a selection)
-3. Total duration of all selections must not exceed {max_duration} seconds
-4. Fragments don't need to be consecutive (can be from different parts of speech)
-
-Consider: announcements, emotional statements, key messages, controversies."""
+    Return JSON in this exact format:
+    {{
+        "selections": [
+            {{
+                "start_time": float,
+                "end_time": float,
+            }}
+            // up to 3 selections allowed
+        ]
+    }}
+    """
 
     def __init__(self, model_name: str = "gemma"):
         self.model = model_name
@@ -68,13 +63,12 @@ Consider: announcements, emotional statements, key messages, controversies."""
             )
             content = self._extract_json(response["message"]["content"].strip())
             result = json.loads(content)
-
+            logger.debug(f"Received response: {result}")
             # Convert all selections to TimeSegments
             segments = [
                 TimeSegment(
                     start_time=float(sel["start_time"]),
                     end_time=float(sel["end_time"]),
-                    reason=str(sel["reason"]),
                 )
                 for sel in result["selections"]
             ]
