@@ -5,12 +5,12 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "ffmpeg-python>=0.2.0",
     "loguru>=0.7.3",
     "moviepy>=2.1.2",
     "ollama>=0.4.7",
     "opencv-python>=4.11.0.86",
     "pydantic>=2.10.6",
-    "python-ffmpeg>=2.0.12",
     "typer",
     "ultralytics>=8.3.71",
     "whisperx>=3.3.1",
