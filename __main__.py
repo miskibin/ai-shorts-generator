@@ -38,14 +38,8 @@ def process_video(
     audio_path = video_processor.extract_audio(video_path)
     sentences = SubtitleGenerator(model_size).process(audio_path)
 
-    # Save sentences to JSON
-    json_sentences = [s.model_dump_json() for s in sentences]
-    with open("sentences.json", "w") as f:
-        json.dump(json_sentences, f, indent=2)
-
     # Find interesting moments
     moments = LLMProcessor(llm_model).process(sentences, max_duration)
-
     # Create highlights with subtitles
     video_processor.create_highlights(video_path, moments, sentences, output_path)
 
