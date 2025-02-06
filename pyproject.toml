@@ -11,6 +11,7 @@ dependencies = [
     "opencv-python>=4.11.0.86",
     "pydantic>=2.10.6",
     "python-ffmpeg>=2.0.12",
+    "typer",
     "ultralytics>=8.3.71",
     "whisperx>=3.3.1",
 ]

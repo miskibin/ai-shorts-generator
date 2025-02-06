@@ -5,15 +5,16 @@ from pathlib import Path
 from loguru import logger
 
 from generator.subtitle import Sentence
+from pydantic import BaseModel
 
 
-@dataclass
-class TimeSegment:
+class TimeSegment(BaseModel):
     start_time: float
     end_time: float
     duration: float = 0.0
 
-    def __post_init__(self):
+    def __init__(self, **data):
+        super().__init__(**data)
         self.duration = round(self.end_time - self.start_time, 2)
 
 
@@ -40,13 +41,35 @@ class LLMProcessor:
     }}
     """
 
-    def __init__(self, model_name: str = "gemma"):
+    def __init__(self, model_name: str | None):
         self.model = model_name
         logger.info(f"Initialized LLM processor with {model_name}")
 
     def process(
         self, sentences: list[Sentence], max_duration: float
     ) -> list[TimeSegment]:
+        if self.model is None:
+            logger.warning(
+                "Model is None, selecting beginning sentences up to max_duration"
+            )
+            segments = []
+            current_duration = 0.0
+
+            for sentence in sentences:
+                if current_duration + (sentence.end - sentence.start) > max_duration:
+                    break
+                segment = TimeSegment(
+                    start_time=sentence.start,
+                    end_time=sentence.end,
+                )
+                segments.append(segment)
+                current_duration += segment.duration
+
+            logger.info(
+                f"Selected {len(segments)} segments, total duration: {current_duration:.2f}s"
+            )
+            return segments
+
         try:
             segments_text = "\n".join(
                 f"[{i}] [{s.start:.2f}-{s.end:.2f}] {s.text}"

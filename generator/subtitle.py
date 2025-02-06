@@ -35,12 +35,11 @@ class SubtitleGenerator:
             aligned = whisperx.align(
                 result["segments"], model_a, metadata, str(audio_path), self.device
             )
-            logger.debug("Alignment completed")
+            logger.debug("Alignment completed. Merging into sentences")
 
             return self._merge_into_sentences(
                 self._normalize_word_segments(aligned.get("segments", []))
             )
-
         except Exception as e:
             logger.error(f"Processing failed: {e}")
             raise
