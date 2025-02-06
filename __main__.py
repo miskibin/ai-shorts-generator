@@ -61,14 +61,26 @@ def parse_args():
     parser.add_argument(
         "--model-size",
         type=str,
+        choices=[
+            "large-v2",
+            "large-v1",
+            "medium",
+            "medium.en",
+            "small",
+            "small.en",
+            "base",
+            "base.en",
+            "tiny",
+            "tiny.en",
+        ],
         default="base",
-        help="Model size for subtitle generation (default: base)",
+        help="Model size for whisperx subtitle generation available models: https://huggingface.co/collections/guillaumekln/faster-whisper-64f9c349b3115b4f51434976",
     )
     parser.add_argument(
         "--llm-model",
         type=str,
         default="phi4",
-        help="LLM model for processing (default: phi4)",
+        help=" Ollama. LLM model for processing (default: phi4) Must be installed in ollama",
     )
     parser.add_argument(
         "--max-duration",

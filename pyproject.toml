@@ -10,6 +10,7 @@ dependencies = [
     "ollama>=0.4.7",
     "opencv-python>=4.11.0.86",
     "pydantic>=2.10.6",
+    "python-ffmpeg>=2.0.12",
     "ultralytics>=8.3.71",
     "whisperx>=3.3.1",
 ]
