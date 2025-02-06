@@ -20,11 +20,15 @@ class TimeSegment(BaseModel):
 
 class LLMProcessor:
     PROMPT_TEMPLATE = """Analyze this political speech (given as a single text chunked into sentences) and select up to 3 continuous fragments that together form a coherent and logical segment. If one long segment makes the most sense, you can select just that one.
+
     Requirements:
-    1. The selection must include the segment where the topic of the statement is introduced.  
-    2. The total duration must not exceed {max_duration}s; aim to use almost all of it.  
-    3. Each fragment must be a continuous block of sentences.  
-    4. The final selection should read as a naturally connected piece, maintaining logical flow.  
+    1. The selection must include the segment where the topic of the statement is introduced.
+    2. The total duration must be as close as possible to {max_duration}s WITHOUT exceeding it. Aim to utilize at least 90% but no more than 100% of the available time.
+    3. Each fragment must be a continuous block of sentences.
+    4. The final selection should read as a naturally connected piece, maintaining logical flow.
+    5. If multiple selections are needed, prefer fewer but longer selections rather than many short ones, as long as they maintain coherence.
+    6. Ensure that the total selected duration does not exceed {max_duration}s.
+
 
     Speech segments:
     {segments}
