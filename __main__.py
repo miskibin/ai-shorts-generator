@@ -1,6 +1,4 @@
-import os
 from dotenv import load_dotenv
-import json
 from pathlib import Path
 from loguru import logger
 import typer
@@ -38,9 +36,7 @@ def process_video(
     audio_path = video_processor.extract_audio(video_path)
     sentences = SubtitleGenerator(model_size).process(audio_path)
 
-    # Find interesting moments
     moments = LLMProcessor(llm_model).process(sentences, max_duration)
-    # Create highlights with subtitles
     video_processor.create_highlights(video_path, moments, sentences, output_path)
 
     logger.info("\nHighlights created:")
