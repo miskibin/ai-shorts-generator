@@ -16,6 +16,6 @@ output/*
 *.mkv
 *.log
 *.webm
-
+outputs/highlights.mp4
 *.mp3
 *.pt
