@@ -48,7 +48,7 @@ def process_video(
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="AI Video Processor for creating highlights with subtitles"
+        description="AI Video Processor for creating highlights with subtitles."
     )
     parser.add_argument("input", type=str, help="Path to input video file")
     parser.add_argument(
