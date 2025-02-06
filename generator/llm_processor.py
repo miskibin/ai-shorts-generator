@@ -70,48 +70,42 @@ class LLMProcessor:
             )
             return segments
 
-        try:
-            segments_text = "\n".join(
-                f"[{i}] [{s.start:.2f}-{s.end:.2f}] {s.text}"
-                for i, s in enumerate(sentences)
+        segments_text = "\n".join(
+            f"[{i}] [{s.start:.2f}-{s.end:.2f}] {s.text}"
+            for i, s in enumerate(sentences)
+        )
+
+        prompt = self.PROMPT_TEMPLATE.format(
+            segments=segments_text, max_duration=max_duration
+        )
+        logger.debug(f"Sending prompt to Ollama:\n{prompt}")
+
+        response = ollama.chat(
+            model=self.model, messages=[{"role": "user", "content": prompt}]
+        )
+        content = self._extract_json(response["message"]["content"].strip())
+        result = json.loads(content)
+        logger.debug(f"Received response: {result}")
+        # Convert all selections to TimeSegments
+        segments = [
+            TimeSegment(
+                start_time=float(sel["start_time"]),
+                end_time=float(sel["end_time"]),
+            )
+            for sel in result["selections"]
+        ]
+
+        total_duration = sum(seg.duration for seg in segments)
+        logger.info(
+            f"Selected {len(segments)} segments, total duration: {total_duration:.2f}s"
+        )
+
+        if total_duration > max_duration:
+            logger.warning(
+                f"Total duration {total_duration:.2f}s exceeds limit {max_duration}s"
             )
 
-            prompt = self.PROMPT_TEMPLATE.format(
-                segments=segments_text, max_duration=max_duration
-            )
-            logger.debug(f"Sending prompt to Ollama:\n{prompt}")
-
-            response = ollama.chat(
-                model=self.model, messages=[{"role": "user", "content": prompt}]
-            )
-            content = self._extract_json(response["message"]["content"].strip())
-            result = json.loads(content)
-            logger.debug(f"Received response: {result}")
-            # Convert all selections to TimeSegments
-            segments = [
-                TimeSegment(
-                    start_time=float(sel["start_time"]),
-                    end_time=float(sel["end_time"]),
-                )
-                for sel in result["selections"]
-            ]
-
-            total_duration = sum(seg.duration for seg in segments)
-            logger.info(
-                f"Selected {len(segments)} segments, total duration: {total_duration:.2f}s"
-            )
-
-            if total_duration > max_duration:
-                logger.warning(
-                    f"Total duration {total_duration:.2f}s exceeds limit {max_duration}s"
-                )
-
-            return segments
-
-        except Exception as e:
-            logger.error(f"Failed to process: {e}")
-            logger.debug(f"Last response: {response['message']['content']}")
-            raise
+        return segments
 
     def _extract_json(self, content: str) -> str:
         if "```" in content:

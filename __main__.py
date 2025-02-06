@@ -18,10 +18,10 @@ def process_video(
         "outputs/highlights.mp4", "-o", "--output", help="Path to output video file"
     ),
     llm_model: str = typer.Option(
-        None, "--llm-model", help="Ollama LLM model for processing"
+        None, "-m", "--llm-model", help="Ollama LLM model for processing"
     ),
     model_size: str = typer.Option(
-        "base", "--model-size", help="Model size for subtitle generation"
+        "base", "-s", "--model-size", help="Model size for subtitle generation"
     ),
     max_duration: float = typer.Option(
         60.0, "--max-duration", help="Maximum duration of highlights in seconds"
