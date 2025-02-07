@@ -22,12 +22,8 @@ AI Shorts Generator is an intelligent video processing tool that automatically c
 
 ## 🚀 Installation
 
-Install AI Shorts Generator easily from the wheel file provided on the [latest release page](https://github.com/miskibin/ai-shorts-generator/releases/latest).
-
-Simply download the `.whl` file from the releases page and install it with pip:
-
 ```bash
-pip install path/to/ai_shorts_generator-<version>-py3-none-any.whl
+ pip install --upgrade git+https://github.com/miskibin/ai-shorts-generator
 ```
 
 *All necessary dependencies will be automatically installed.*
