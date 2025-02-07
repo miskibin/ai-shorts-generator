@@ -22,6 +22,9 @@ AI Shorts Generator is an intelligent video processing tool that automatically c
 
 ## 🚀 Installation
 
+1. install ffmpeg
+2. install cuda and cudnn
+
 ```bash
  pip install --upgrade git+https://github.com/miskibin/ai-shorts-generator
 ```

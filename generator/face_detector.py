@@ -4,11 +4,22 @@ from collections import deque
 import numpy as np
 from typing import Optional, Tuple, List
 from loguru import logger
+from generator.utils import has_cuda
 
 
 class FaceTracker:
     def __init__(self, model_path: str = "yolov8n.pt", smoothing_window: int = 30):
-        self.model = YOLO(model_path)
+        # Initialize model with CPU if CUDA is not available
+        device = "cuda" if has_cuda() else "cpu"
+        logger.info(f"Initializing YOLO model on {device}")
+        try:
+            self.model = YOLO(model_path).to(device)
+        except Exception as e:
+            logger.warning(
+                f"Failed to load YOLO model with CUDA, falling back to CPU: {e}"
+            )
+            self.model = YOLO(model_path).to("cpu")
+
         self.tracker = None
         self.position_history = deque(maxlen=smoothing_window)
         self.tracking_initialized = False

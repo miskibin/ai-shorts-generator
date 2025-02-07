@@ -3,6 +3,7 @@ from pathlib import Path
 import cv2
 from loguru import logger
 import numpy as np
+import torch
 
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
@@ -19,6 +20,19 @@ def moving_average(values, window_size):
     weights = np.exp(np.linspace(-1.0, 0.0, window_size))
     weights /= weights.sum()
     return np.convolve(values, weights, mode="valid")
+
+
+def has_cuda() -> bool:
+    """Check if CUDA is available and working"""
+    try:
+        if torch.cuda.is_available():
+            # Try to initialize CUDA to check if it really works
+            torch.cuda.init()
+            return True
+        return False
+    except Exception as e:
+        logger.warning(f"CUDA initialization failed: {e}")
+        return False
 
 
 def draw_multiline_text(
