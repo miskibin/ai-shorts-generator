@@ -1,5 +1,5 @@
 [project]
-name = "ai-shorts-generator"
+name = "ai_shorts_generator" # Changed from ai-shorts-generator
 version = "0.1.1"
 description = "Add your description here"
 readme = "README.md"
@@ -15,6 +15,9 @@ dependencies = [
     "ultralytics>=8.3.71",
     "whisperx>=3.3.1",
 ]
+
+[project.scripts]
+ai-shorts = "generator.cli:main" # Add this section to create an entry point
 
 [tool.setuptools]
 packages = ["generator"]
