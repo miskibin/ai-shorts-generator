@@ -35,7 +35,7 @@ AI Shorts Generator is an intelligent video processing tool that automatically c
 Once installed, you can process your videos directly from the command line. Here’s a typical command:
 
 ```bash
-ai-shorts-generator process_video path/to/your_video.mp4 --output path/to/output_highlights.mp4 --max-duration 60.0 --llm-model <model_name> --model-size base
+python -m generator <video_path> [OPTIONS] 
 ```
 
 ### Command Options
