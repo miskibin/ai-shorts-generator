@@ -21,6 +21,10 @@ ai-shorts = "generator.cli:main" # Add this section to create an entry point
 
 [tool.setuptools]
 packages = ["generator"]
+package-dir = { "" = "." }
 
 [tool.setuptools.package-data]
-generator = ["assets/*"]
+generator = ["assets/fonts/*"]
+
+[tool.setuptools.exclude-package-data]
+"*" = ["*.pyc", "*.pyo", "*.pyd", "__pycache__"]

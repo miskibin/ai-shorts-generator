@@ -12,15 +12,24 @@ from generator.utils import (
     AspectRatio,
     draw_multiline_text,
 )
+import importlib.resources
 
 
 class VideoProcessor:
     def __init__(self):
-        self.font_path = (
-            Path(__file__).parent.parent / "assets" / "fonts" / "Roboto-Bold.ttf"
-        )
+        # Get the font path using importlib.resources
+        try:
+            with importlib.resources.path(
+                "generator.assets.fonts", "Roboto-Bold.ttf"
+            ) as font_path:
+                self.font_path = Path(font_path)
+        except Exception as e:
+            logger.error(f"Failed to locate font: {e}")
+            raise FileNotFoundError(f"Font not found in package resources")
+
         if not self.font_path.exists():
             raise FileNotFoundError(f"Font not found: {self.font_path}")
+
         self.face_tracker = FaceTracker(smoothing_window=30)
 
     def extract_audio(self, video_path: Path) -> Path:
