@@ -19,29 +19,35 @@ class TimeSegment(BaseModel):
 
 
 class LLMProcessor:
-    PROMPT_TEMPLATE = """Analyze this political speech (given as a single text chunked into sentences) and select up to 3 continuous fragments that together form a coherent and logical segment. If one long segment makes the most sense, you can select just that one.
+    PROMPT_TEMPLATE = """You are an expert speech analyst. Your task is to analyze this political speech and select the most important and coherent segments that capture the main message.
+
+    First, identify the main topic and key points of the speech. Then, select continuous segments that best represent these points while maintaining natural flow and coherence.
 
     Requirements:
-    1. The selection must include the segment where the topic of the statement is introduced.
-    2. The total duration must be as close as possible to {max_duration}s WITHOUT exceeding it. Aim to utilize at least 90% but no more than 100% of the available time.
-    3. Each fragment must be a continuous block of sentences.
-    4. The final selection should read as a naturally connected piece, maintaining logical flow.
-    5. If multiple selections are needed, prefer fewer but longer selections rather than many short ones, as long as they maintain coherence.
-    6. Ensure that the total selected duration does not exceed {max_duration}s.
-
-
+    1. First identify and include the segment that introduces the main topic.
+    2. Select the most impactful and important segments that support or develop the main topic.
+    3. Make as few cuts as possible - prefer longer continuous segments over multiple short ones.
+    4. The selected segments must flow naturally when played together - ensure logical connections between segments.
+    5. Total duration MUST be between 80-100% of {max_duration}s, never exceeding it.
+    6. You may select up to 3 continuous segments if needed, but prefer fewer if possible.
+    
     Speech segments:
     {segments}
 
     Return JSON in this exact format:
     {{
+         "analysis": {{
+            "main_topic": "Brief description of the main topic",
+            "selection_reasoning": "Brief explanation of why these segments were chosen"
+        }},
         "selections": [
             {{
                 "start_time": float,
                 "end_time": float,
             }}
             // up to 3 selections allowed
-        ]
+        ],
+       
     }}
     """
 
